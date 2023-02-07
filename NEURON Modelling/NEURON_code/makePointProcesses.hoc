@@ -1,0 +1,121 @@
+///////////////////////////////////////////////////////////////////////////////
+// makePointProcesses.hoc: builds synapses/ vclamp in the model
+//
+// Note: this must be run *after* the cell geometry has been initialized
+///////////////////////////////////////////////////////////////////////////////
+
+
+
+//////////////////// declarations /////////////////////////////////////////////
+// post-synaptic objects
+objectvar gaba_syn[NumGABAsyn], ExpVClamp
+objref srlist, vecpos, vecdistance, r, randomVec
+
+
+//-----------------------------------------------------------------------------
+// insert the GABA synapses
+//-----------------------------------------------------------------------------
+
+proc insertGABAsyn() {
+
+
+	//srlist and vecpos have the same number of indices and collectively they store all possible positions and the setion they're in
+	srlist = new List() // store the sections
+	vecpos = new Vector() // store the positions
+	vecdistance = new Vector() // store distance
+	forall {
+				for (x) {
+					soma distance(0,0.5) //sets the origin point middle of soma
+					//apic[11] distance(0,0.5909) //sets the origin point 50 um from soma
+					//apic[12] distance(0,0.112) //sets the origin point 100 um from soma
+					//apic[20] distance(0,0.409) //sets the origin point 150 um from soma
+					//apic[22] distance(0,0.080) //sets the origin point 200 um from soma
+					if(distance(x) > 0 - dist_fr_sec && distance(x) < 0 + dist_fr_sec) {
+						//print secname(), " ", x, distance(x)
+						
+						srlist.append(new SectionRef()) // for each section create a new SectionRef that refers to that section and append that SectionRef to srlist
+						vecpos.append(x)
+						vecdistance.append(distance(x))
+					}
+					
+				
+					
+				}
+			}
+
+
+	//random picks from the possible positions
+	r = new Random()
+	r.uniform(0, srlist.count()-1)
+	//for i=1,4 print r.repick() 
+	randomVec = new Vector(NumGABAsyn)
+	randomVec.setrand(r)
+
+
+	//iterating through the chosen random positions
+	for ii = 0,NumGABAsyn-1  {
+		access srlist.o(randomVec.x[ii]).sec 
+		//print secname()
+		//print vecpos.x[randomVec.x[ii]] 
+
+		gaba_syn[ii] = new AlphaSynapse(vecpos.x[randomVec.x[ii]])
+		gaba_syn[ii].tau = GABAsyn_tau
+		gaba_syn[ii].onset = GABAsyn_onset
+		gaba_syn[ii].gmax = GABAsyn_gmax
+		gaba_syn[ii].e = GABAsyn_e
+	}
+
+} 
+
+
+//-----------------------------------------------------------------------------
+// insert the voltage clamp
+//-----------------------------------------------------------------------------
+objref tvec,vvec
+if(ClampVolt==1){
+	soma {ExpVClamp = new SEClamp(0)}
+	ExpVClamp.dur1 = 2000
+	ExpVClamp.rs = Rseries
+	
+	
+	// making the VClamp vectors
+
+	
+	tvec = new Vector(14)
+	vvec = new Vector(14)
+	tvec.x[0] = 0
+	vvec.x[0] = Vrest
+	tvec.x[1] = 130
+	vvec.x[1] = Vrest
+	tvec.x[2] = 131
+	vvec.x[2] = Vrest-10
+	tvec.x[3] = 231
+	vvec.x[3] = Vrest-10
+	tvec.x[4] = 231 + 1
+	vvec.x[4] = Vrest
+	tvec.x[5] = 730
+	vvec.x[5] = Vrest
+	tvec.x[6] = 731
+	vvec.x[6] = RampLow
+	tvec.x[7] = 831
+	vvec.x[7] = RampHigh
+	tvec.x[8] = 831 + 1
+	vvec.x[8] = Vrest
+	tvec.x[9] = 1360
+	vvec.x[9] = Vrest
+	tvec.x[10] = 1361
+	vvec.x[10] = RampLow
+	tvec.x[11] = 1461
+	vvec.x[11] = RampHigh
+	tvec.x[12] = 1461 + 1
+	vvec.x[12] = Vrest
+	tvec.x[13] = 1999
+	vvec.x[13] = Vrest
+	
+	
+	
+	
+	vvec.play(&ExpVClamp.amp1,tvec,1) //vsrc.play(&var or stmt, Dt or Tvec, continuous) ... When continuous is 1 then linear interpolation is used to define the values between time points
+	}
+	
+

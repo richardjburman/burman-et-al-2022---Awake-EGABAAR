@@ -1,0 +1,52 @@
+///////////////////////////////////////////////////////////////////////////////
+// setParameters.hoc: sets all the user adjustable parameters for the model
+///////////////////////////////////////////////////////////////////////////////
+
+// the directory to put the files in and the prefix for the files
+strdef outdir, fprefix
+outdir  = "./data"
+fprefix = "puff_spread"
+
+
+//-----------------------------------------------------------------------------
+// global parameters
+dt_set = 0.25
+v_init_set = -70
+
+v_init            = v_init_set     // mV
+tstop             = 2000     // ms
+dt                = dt_set   // ms
+celsius           = 36      // C degrees
+
+//-----------------------------------------------------------------------------
+// global biophysical parameters
+Rm_glob = 10^3.9882 // ohm cm2  Anaethetized: 10^3.784 gives Rm 87.2 Awake: 10^3.540 gives Rm 50.6 NBQX: 10^3.9882 gives Rm 136.2
+Vrest = -71.4 // mV  Anaethetized: -70.7 mV Awake: -64.2 mV NBQX: -71.4
+Ra_glob = 150		// Ohm*cm
+Cm_glob = 2.515	//uF/cm^2 2.515 gives Cm of 150 pF (Rs 47.5) in awake but 155 pF in NBQX
+g_pas_glob = 1/Rm_glob	// S/cm2
+e_pas_glob = Vrest	// mV
+
+//-----------------------------------------------------------------------------
+// GABAaR synapse parameters
+GABAe_low = -85
+GABAe_high = -35
+GABAe_step = 5
+Numsimsteps = (GABAe_high - GABAe_low)/GABAe_step
+
+
+//set distance from soma in "makePointProcesses"
+dist_fr_sec = 75	// synapses will be spread within X µm radius 
+NumGABAsyn = 20		// number of GABAaR synapses
+
+GABAsyn_tau = 150		// ms
+GABAsyn_onset = 1301	// ms
+GABAsyn_gmax = 0.020/NumGABAsyn	// uS    0.010
+GABAsyn_e = GABAe_low	// mV
+
+//-----------------------------------------------------------------------------
+// Voltage clamp parameters
+Rseries = 47.5 // in MOhm  
+ClampVolt = 1 //insert voltage clamp
+RampLow = -130//-130
+RampHigh = -30//-30

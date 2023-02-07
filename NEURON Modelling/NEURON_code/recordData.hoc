@@ -1,0 +1,72 @@
+///////////////////////////////////////////////////////////////////////////////
+// recordData.hoc: this script can be used to record from the simulation
+///////////////////////////////////////////////////////////////////////////////
+
+
+
+//objects to record
+objref recv, recvmem, reci, rect
+
+recv = new Vector()
+recvmem = new Vector()
+reci = new Vector()
+rect = new Vector()
+
+
+
+recv.record(&ExpVClamp.amp1) // Voltage clamp command
+//recvmem.record(&apic[19].v(0.5)) // dendrite voltage
+recvmem.record(&soma.v(0.5)) // soma voltage
+reci.record(&ExpVClamp.i) // Current recorded
+rect.record(&t) // record time
+
+
+objref simsteps[Numsimsteps]
+
+//objects to save
+objref savv, savvmem, savi, savt
+
+for i=0, Numsimsteps-1 {
+print GABAsyn_e
+GABAsyn_e = GABAe_low + i*GABAe_step
+insertGABAsyn()
+
+init()
+run()
+
+
+
+savv = new File()
+savvmem = new File()
+savi = new File()
+savt = new File()
+
+
+strdef filenamev
+strdef filenamevmem
+strdef filenamei
+strdef filenamet
+
+sprint(filenamev,"%s/%s_v_r%03.0f.dat",outdir,fprefix,i)
+sprint(filenamevmem,"%s/%s_vmem_r%03.0f.dat",outdir,fprefix,i)
+sprint(filenamei,"%s/%s_i_r%03.0f.dat",outdir,fprefix,i)
+sprint(filenamet,"%s/%s_t_r%03.0f.dat",outdir,fprefix,i)
+
+savv.wopen(filenamev)
+savvmem.wopen(filenamevmem)
+savi.wopen(filenamei)
+savt.wopen(filenamet)
+
+
+recv.printf(savv)
+recvmem.printf(savvmem)
+reci.printf(savi)
+rect.printf(savt)
+
+savv.close()
+savvmem.close()
+savi.close()
+savt.close()
+}
+
+
